@@ -1,0 +1,613 @@
+---
+title: "Findings for Koppers invesitgation with Cicero Independiente"
+execute:
+  output: false
+  echo: false
+format:
+  html:
+    code-tools: true
+    theme: cosmo
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+library(readxl)
+library(stringr)
+library(DT)
+```
+
+```{r}
+# LOAD DATA 
+
+# Pollutant codes for Illinois, which seems to have it's own code system. These were copy and pasted from the following website: https://epa.illinois.gov/topics/air-quality/planning-reporting/annual-emission-reports/reference-tables/pollutants.html
+pollutant_code_crosswalk <- read_csv(here("data", "manual", "pollutant_code_crosswalk.csv")) %>% 
+  clean_names()
+
+# These are the total annual emissions reported to the Illinois EPA in the Air Emissions Invetory. We recieved this data through an open records request to the IEPA 
+cook_county_emissions <- read_excel(here("data", "raw", "foia_reported_emissions_2012-2021.xlsx")) %>% 
+  clean_names() %>% 
+  left_join(pollutant_code_crosswalk, by = "pollutant_code") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  mutate(year = str_replace(year, "x", ""))
+
+# National data from the EPA's Toxic Release Inventory on emissions for benzene and naphthalene. This data is the first file of the Basic Plus dataset. I pulled the years 2012 to 2022 since that is what we have for the Cook County emissions inventory. The data loaded here was processed in cleaned in the etl/prep_tri_data.R file. 
+tri_naphthalene_benzene <- read_csv(here("data", "processed", "tri_benzene_and_napthalene.csv"))
+
+# This data comes from the EPA's AirToxScreen and represents the additional amount of people who could have cancer from this specific pollutan, e.g. an extra 10 in one million
+cancer_risk_tract <- read_csv(here("data", "processed", "airtoxscreen_naphthalene_benzene_risk.csv")) %>% 
+  clean_names() 
+  
+```
+
+
+## How Koppers compares to other polluters in Cook County 
+
+### Data
+- These are the total annual emissions reported to the Illinois EPA in the Air Emissions Invetory. We recieved this data through an open records request to the IEPA 
+
+### Findings 
+- Koppers reports two dozen pollutants to the EPA, including several irritants and hazardous pollutants as well as five known or possible carcinogens 
+- The pollutants below are a list of the top emissions of Koppers, exluding carbon and particulate matter categories, and including any known or possible carcinogen
+ 
+
+```{r}
+koppers_pollutants <- cook_county_emissions %>% 
+  filter(name == "Koppers Inc") %>% 
+  group_by(name, pollutant_code, chemical_name) %>% 
+  summarize(sum_total_emissions = sum(emissions, na.rm = TRUE)) 
+
+```
+
+### Kopper's total emissions by pollutants from 2012 to 2021
+```{r}
+#| output: true
+datatable(koppers_pollutants, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+
+
+```{r}
+cook_county_so2_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "SO2") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+
+```{r}
+cook_county_nox_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "NOX") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+
+```{r}
+cook_county_vom_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "VOM") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+
+```{r}
+cook_county_panhy_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "85449") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+
+```{r}
+cook_county_manhy_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "108316") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+
+```{r}
+cook_county_naphthalene_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "91203") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+
+```{r}
+cook_county_benzene_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "BENZENE") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+```{r}
+cook_county_quinoline_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "QUINOLINE") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2))%>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+```{r}
+cook_county_styrene_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "STYRENE") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+
+```{r}
+cook_county_creosote_avg <- cook_county_emissions %>% 
+  filter(pollutant_code == "8001589") %>% 
+  group_by(name) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  ungroup %>% 
+  mutate(percent_rank = round(percent_rank(avg), 2))
+```
+
+
+### Hazardous but not cancerous pollutants 
+#### Sulfur dioxide 
+
+```{r}
+#| output: true
+datatable(cook_county_so2_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+#### Nitrogen Oxides 
+
+```{r}
+#| output: true
+datatable(cook_county_nox_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+#### Phthalic anhydride
+
+```{r}
+#| output: true
+datatable(cook_county_panhy_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+#### Maleic anhydride 
+
+```{r}
+#| output: true
+datatable(cook_county_manhy_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
+### Known or possible carcinogens 
+
+
+#### Volatile organic material
+- An umbrella category that can include known carcinogens, but as a category is not a carcinogen itself 
+
+
+```{r}
+#| output: true
+datatable(cook_county_vom_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+#### Benzene
+- [Well known carcinogen](https://www.epa.gov/sites/default/files/2016-09/documents/benzene.pdf)
+
+
+```{r}
+#| output: true
+datatable(cook_county_benzene_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+#### Naphthalene
+- Possible [carcinogen by EPA](https://www.epa.gov/sites/default/files/2016-09/documents/naphthalene.pdf), probable by IARC, known by Cal EPA 
+
+
+```{r}
+#| output: true
+datatable(cook_county_naphthalene_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+#### Quinoline
+- [Probable by EPA and IARC](https://iris.epa.gov/ChemicalLanding/&substance_nmbr=1004)
+
+
+```{r}
+#| output: true
+datatable(cook_county_quinoline_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+
+#### Styrene
+- [Probably by IARC](https://www.epa.gov/sites/default/files/2020-05/documents/styrene_update_2a.pdf), but not classified by EPA
+
+```{r}
+#| output: true
+datatable(cook_county_styrene_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+
+#### Creosote
+- [Probably by IARC and EPA](https://cfpub.epa.gov/si/si_public_record_Report.cfm?dirEntryID=40306)
+
+```{r}
+#| output: true
+datatable(cook_county_creosote_avg, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+
+
+## How Koppers compares by select pollutants nationally 
+
+### Data
+- National data from the EPA's Toxic Release Inventory on emissions for benzene and naphthalene. This data is the first file of the Basic Plus dataset. I pulled the years 2012 to 2022 since that is what we have for the Cook County emissions inventory. The data loaded here was processed in cleaned in the etl/prep_tri_data.R file. 
+
+### Findings
+- Koppers is in the top 1% of naphthalene polluters in the country and has been over the last decade
+- Koppers in the top 10-15% for Benzene pollution
+
+```{r}
+naphthalene_sum <- tri_naphthalene_benzene %>% 
+  filter(x76_cas_number == "91-20-3") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name) %>% 
+  summarize(sum_total = sum(x115_total_air_emissions)) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(sum_total))
+
+naphthalene_mean <- tri_naphthalene_benzene %>% 
+  filter(x76_cas_number == "91-20-3") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name) %>% 
+  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(mean))
+
+naphthalene_median <- tri_naphthalene_benzene %>% 
+  filter(x76_cas_number == "91-20-3") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name) %>% 
+  summarize(median = median(x115_total_air_emissions)) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(median))
+```
+
+```{r}
+benzene_sum <- tri_naphthalene_benzene %>% 
+  filter(x76_cas_number == "71-43-2") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name) %>% 
+  summarize(sum_total = sum(x115_total_air_emissions)) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(sum_total))
+
+benzene_mean <- tri_naphthalene_benzene %>% 
+  filter(x76_cas_number == "71-43-2") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name) %>% 
+  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(mean))
+
+benzene_median <- tri_naphthalene_benzene %>% 
+  filter(x76_cas_number == "71-43-2") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name) %>% 
+  summarize(median = median(x115_total_air_emissions)) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(median))
+```
+
+#### Naphthalene 
+
+```{r}
+#| output: true
+datatable(naphthalene_mean, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+#### Benzene
+
+```{r}
+#| output: true
+datatable(benzene_mean, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+## Cancer Risk by Census tract for benzene and napthalene 
+### Data 
+- This data comes from the EPA's AirToxScreen and represents the additional amount of people who could have cancer from this specific pollutan, e.g. an extra 10 in one million 
+- What's interesting is that AirToxScreen includes naphthalene even though it's just a possible carcinogen, but doesn't include all possible or probable carcinogens 
+### Findings 
+
+### Benzene
+```{r}
+
+cicero_tracts <- c("031815500","031814500","031814400", "31814300", "031814200","031820700", "031560100", "031560200", "031820800")
+  
+
+benzene_risk_cicero <- cancer_risk_tract %>% 
+  select(-naphthalene) %>% 
+  mutate(percent_rank = percent_rank(benzene)) %>% 
+  filter(census_tract %in% cicero_tracts)
+```
+
+
+#### Benzene risk in Cicero tracts near Koppers
+
+```{r}
+#| output: true
+datatable(benzene_risk_cicero, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+#### Naphthalene
+```{r}
+
+cicero_tracts <- c("031815500","031814500","031814400", "31814300", "031814200","031820700", "031560100", "031560200", "031820800")
+
+naphthalene_risk_top_100 <- cancer_risk_tract %>% 
+  select(-benzene) %>% 
+  mutate(percent_rank = percent_rank(naphthalene)) %>% 
+  slice_max(order_by = naphthalene, n = 100)
+
+naphthalene_risk_cicero <- cancer_risk_tract %>% 
+  select(-benzene) %>% 
+  mutate(percent_rank = percent_rank(naphthalene)) %>% 
+  filter(census_tract %in% cicero_tracts)
+```
+
+#### Top 100 Census tracts as for Naphthalene risk across the country
+
+```{r}
+#| output: true
+datatable(naphthalene_risk_top_100, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+#### Naphthalene risk in Cicero tracts near Koppers
+
+```{r}
+#| output: true
+datatable(naphthalene_risk_cicero, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```

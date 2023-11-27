@@ -1,0 +1,276 @@
+---
+title: "AER Exploratory Mapping"
+execute:
+  output: false
+  echo: false
+format:
+  html:
+    code-tools: true
+    theme: cosmo
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+library(readxl)
+library(ggmap)
+library(mapview)
+library(sp)
+```
+
+```{r}
+# LOAD DATA
+cook_county_emissions <- read_excel(here("data", "raw", "foia_reported_emissions_2012-2021.xlsx")) %>% 
+  clean_names() %>% 
+  mutate(address_full = paste(address, city, state, sep = ", ")) %>% 
+  mutate(address_full = paste(address_full, zipcode, sep = " "))
+
+facility_lat_longs <- read_csv(here("data", "processed", "aer_lat_longs.csv")) %>% 
+  select(name, address_full, lat, lon) 
+
+pollutant_code_crosswalk <- read_csv(here("data", "manual", "pollutant_code_crosswalk.csv")) %>% 
+  clean_names()
+
+emissions_mapping <- cook_county_emissions %>% 
+  left_join(facility_lat_longs, by = c("name", "address_full")) %>% 
+  left_join(pollutant_code_crosswalk, by = "pollutant_code")
+```
+
+```{r}
+# We have 141 distinct pollutant codes
+# Only 100 have matching chemical name from IEPA website
+pollutants <- emissions_mapping %>% 
+  distinct(pollutant_code, chemical_name)
+
+
+# We want benzene and naphthalene
+# BENZENE
+# 91203
+```
+
+# Primary pollutants 
+```{r}
+carbon_dioxide<- emissions_mapping %>% 
+  filter(pollutant_code == "CO2") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+## Carbon dioxide 
+
+```{r}
+#| output: true
+#| column: page
+mapview(carbon_dioxide, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+
+## Sulfur dioxide 
+
+```{r}
+sulfur_dioxide <- emissions_mapping %>% 
+  filter(pollutant_code == "SO2") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+```{r}
+#| output: true
+#| column: page
+mapview(sulfur_dioxide, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+## Nitrogen Oxides
+
+
+```{r}
+nitrogen_oxides <- emissions_mapping %>% 
+  filter(pollutant_code == "NOX") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+```{r}
+#| output: true
+#| column: page
+mapview(nitrogen_oxides, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+## Volatile Organic Material 
+```{r}
+vom <- emissions_mapping %>% 
+  filter(pollutant_code == "VOM") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+
+```{r}
+#| output: true
+#| column: page
+mapview(vom, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+## Carbon monoxide
+
+```{r}
+carbon_monoxide <- emissions_mapping %>% 
+  filter(pollutant_code == "CO") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+
+```{r}
+#| output: true
+#| column: page
+mapview(carbon_monoxide, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+# Secondary pollutants / VOCs
+
+
+
+## Naphthalene 
+
+```{r}
+naphthalene <- emissions_mapping %>% 
+  filter(pollutant_code == "91203") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+```{r}
+#| output: true
+#| column: page
+mapview(naphthalene, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+## Benzene 
+
+
+```{r}
+
+benzene <- emissions_mapping %>% 
+  filter(pollutant_code == "BENZENE") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+```{r}
+#| output: true
+#| column: page
+mapview(benzene, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+
+## Maleic anhydride
+
+
+```{r}
+m_anhydride <- emissions_mapping %>% 
+  filter(pollutant_code == "108316") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+
+```{r}
+#| output: true
+#| column: page
+mapview(m_anhydride, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+
+## Phthalic anhydride
+
+```{r}
+p_anhydride <- emissions_mapping %>% 
+  filter(pollutant_code == "85449") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+
+```{r}
+#| output: true
+#| column: page
+mapview(m_anhydride, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
+
+## Xylene (o-isomer)
+
+```{r}
+xylene <- emissions_mapping %>% 
+  filter(pollutant_code == "XYLENE-O") %>% 
+  pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
+  group_by(name, city, pollutant_code, lat, lon) %>% 
+  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+
+```
+
+
+```{r}
+#| output: true
+#| column: page
+mapview(xylene, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
+        zcol = "avg", cex = "avg")
+
+
+
+```
