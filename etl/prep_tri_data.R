@@ -28,12 +28,12 @@ col_names <- as.data.frame(colnames(all_years))
 
 # Seperate just benzene and napthalene out 
 # Get rid of any rows where total air emissions is NA, because those are emissions of a different sort. We're just interested in air 
-benzene_and_napthalene <- all_years %>% 
-  filter(x76_cas_number %in% c("71-43-2", "91-20-3")) %>% 
+koppers_pollutants <- all_years %>% 
+  filter(x76_cas_number %in% c("71-43-2", "91-20-3", "85-44-9", "108-31-6", "7446-09-5", "91-22-5", "100-42-5", "8001-58-9")) %>% 
   filter(!is.na(x115_total_air_emissions)) 
 
 # Export for use in analysis 
-write.csv(benzene_and_napthalene, "data/processed/tri_benzene_and_napthalene.csv")
+write.csv(koppers_pollutants, "data/processed/koppers_tri_pollutants.csv")
 
 
 

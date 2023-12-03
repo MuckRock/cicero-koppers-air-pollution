@@ -9,7 +9,7 @@ cancer_risk_tract <- read_excel(here("data", "raw", "2019_National_CancerRisk_by
 
 cols <- as.data.frame(colnames(cancer_risk_tract))
                          
-                         
+# Data only covers benzene and naphthelene, not quinonline, styrene or creosote                          
 naphthalene_benzene <- cancer_risk_tract %>% 
   select(state, epa_region, county, fips, tract, population, benzene, naphthalene) %>% 
   #filter(state == "IL") %>% 

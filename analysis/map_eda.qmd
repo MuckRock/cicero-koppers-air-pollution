@@ -168,8 +168,10 @@ mapview(carbon_monoxide, xcol = "lon", ycol = "lat", crs = 4269, grid = FALSE,
 naphthalene <- emissions_mapping %>% 
   filter(pollutant_code == "91203") %>% 
   pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
-  group_by(name, city, pollutant_code, lat, lon) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
+  filter(emissions > 0) %>% 
+  distinct(name)
+  #group_by(name, city, pollutant_code, lat, lon) %>% 
+  #summarize(avg = round(mean(emissions, na.rm = TRUE), digits = 2))
 
 ```
 

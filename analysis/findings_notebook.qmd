@@ -33,8 +33,8 @@ cook_county_emissions <- read_excel(here("data", "raw", "foia_reported_emissions
   pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
   mutate(year = str_replace(year, "x", ""))
 
-# National data from the EPA's Toxic Release Inventory on emissions for benzene and naphthalene. This data is the first file of the Basic Plus dataset. I pulled the years 2012 to 2022 since that is what we have for the Cook County emissions inventory. The data loaded here was processed in cleaned in the etl/prep_tri_data.R file. 
-tri_naphthalene_benzene <- read_csv(here("data", "processed", "tri_benzene_and_napthalene.csv"))
+# National data from the EPA's Toxic Release Inventory on emissions for benzene, naphthalene, phthalic anhydride, maleic anhydride, quinoline, styrene and creosote. This data is the first file of the Basic Plus dataset. I pulled the years 2012 to 2022 since that is what we have for the Cook County emissions inventory. The data loaded here was processed in cleaned in the etl/prep_tri_data.R file. 
+koppers_tri_pollutants <- read_csv(here("data", "processed", "koppers_tri_pollutants.csv"))
 
 # This data comes from the EPA's AirToxScreen and represents the additional amount of people who could have cancer from this specific pollutan, e.g. an extra 10 in one million
 cancer_risk_tract <- read_csv(here("data", "processed", "airtoxscreen_naphthalene_benzene_risk.csv")) %>% 
@@ -46,12 +46,71 @@ cancer_risk_tract <- read_csv(here("data", "processed", "airtoxscreen_naphthalen
 ## How Koppers compares to other polluters in Cook County 
 
 ### Data
-- These are the total annual emissions reported to the Illinois EPA in the Air Emissions Invetory. We recieved this data through an open records request to the IEPA 
+- These are the total annual emissions reported to the Illinois EPA in the Air Emissions Invetory. We received this data through an open records request to the IEPA 
 
 ### Findings 
 - Koppers reports two dozen pollutants to the EPA, including several irritants and hazardous pollutants as well as five known or possible carcinogens 
 - The pollutants below are a list of the top emissions of Koppers, exluding carbon and particulate matter categories, and including any known or possible carcinogen
+- 0f 41 pollutants emitted in Cicero, Koppers is the highest polluter of 22 of them. The next top polluter is only at the top of the list for 7 pollutants
  
+
+```{r}
+cicero_mean <- cook_county_emissions %>% 
+  filter(city == "Cicero") %>% 
+  group_by(name, pollutant_code, chemical_name) %>% 
+  summarize(mean_emissions = mean(emissions, na.rm = TRUE))
+
+```
+
+```{r}
+cicero_mean_highest_values <- cicero_mean %>% 
+  group_by(pollutant_code, chemical_name) %>% 
+  filter(mean_emissions == max(mean_emissions))
+              
+```
+
+
+### Cicero's average emissions in the last decade by polluter and pollutant
+```{r}
+#| output: true
+datatable(cicero_mean, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+### Cicero's top polluters in the last decade by polluter and pollutant
+```{r}
+#| output: true
+datatable(cicero_mean_highest_values, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+  
+
+
+```
+
+
 
 ```{r}
 koppers_pollutants <- cook_county_emissions %>% 
@@ -423,54 +482,146 @@ datatable(cook_county_creosote_avg, filter = 'top', class = 'cell-border stripe 
 - National data from the EPA's Toxic Release Inventory on emissions for benzene and naphthalene. This data is the first file of the Basic Plus dataset. I pulled the years 2012 to 2022 since that is what we have for the Cook County emissions inventory. The data loaded here was processed in cleaned in the etl/prep_tri_data.R file. 
 
 ### Findings
-- Koppers is in the top 1% of naphthalene polluters in the country and has been over the last decade
-- Koppers in the top 10-15% for Benzene pollution
+#### Mean across decade
+- Naphthalene: Top 1% of 1,629 emitters 
+- Benzene: Top 13% of 1,030 emitters
+- Phthalic anhydride: Top 1% (second place) of 127 emitters 
+- Maleic anhydride: Top 1% (second place) of 161 emitters
+- Quinonline: Top 8% (second place) of 15 emitters
+- Styrene: Under bottom 1% of 1,543 polluters 
+- Creosote: Around top 60% of 74 polluters 
+
+#### Total across decade
+- Naphthalene: Top 1% of 1,629 emitters 
+- Benzene: Top 12% of 1,030 emitters
+- Phthalic anhydride: Top 1% (second place) of 127 emitters 
+- Maleic anhydride: Top 1% (second place) of 161 emitters
+- Quinonline: Top 8% (second place) of 15 emitters
+- Styrene: Under bottom 1% of 1,543 polluters
+- Creosote: Around top 60% of 74 polluters 
 
 ```{r}
-naphthalene_sum <- tri_naphthalene_benzene %>% 
+naphthalene_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "91-20-3") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name) %>% 
-  summarize(sum_total = sum(x115_total_air_emissions)) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(sum_total = sum(x115_total_air_emissions)) %>%  
+  filter(sum_total > 0) %>% 
   ungroup() %>% 
   mutate(percent_rank = percent_rank(sum_total))
 
-naphthalene_mean <- tri_naphthalene_benzene %>% 
-  filter(x76_cas_number == "91-20-3") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name) %>% 
-  summarize(mean = mean(x115_total_air_emissions)) %>% 
-  ungroup() %>% 
-  mutate(percent_rank = percent_rank(mean))
-
-naphthalene_median <- tri_naphthalene_benzene %>% 
-  filter(x76_cas_number == "91-20-3") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name) %>% 
-  summarize(median = median(x115_total_air_emissions)) %>% 
-  ungroup() %>% 
-  mutate(percent_rank = percent_rank(median))
-```
-
-```{r}
-benzene_sum <- tri_naphthalene_benzene %>% 
+benzene_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "71-43-2") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
   summarize(sum_total = sum(x115_total_air_emissions)) %>% 
+  filter(sum_total > 0) %>% 
   ungroup() %>% 
   mutate(percent_rank = percent_rank(sum_total))
 
-benzene_mean <- tri_naphthalene_benzene %>% 
-  filter(x76_cas_number == "71-43-2") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name) %>% 
+p_anhydride_sum <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "85-44-9") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(sum_total = sum(x115_total_air_emissions)) %>%  
+  filter(sum_total > 0) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(sum_total))
+
+m_anhydride_sum <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "108-31-6") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(sum_total = sum(x115_total_air_emissions)) %>% 
+  filter(sum_total > 0) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(sum_total))
+
+quinoline_sum <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "91-22-5") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(sum_total = sum(x115_total_air_emissions)) %>%  
+  filter(sum_total > 0) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(sum_total))
+
+styrene_sum <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "100-42-5") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(sum_total = sum(x115_total_air_emissions)) %>% 
+  filter(sum_total > 0) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(sum_total))
+
+creosote_sum <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "8001-58-9") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(sum_total = sum(x115_total_air_emissions)) %>%  
+  filter(sum_total > 0) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(sum_total))
+
+
+```
+
+
+```{r}
+naphthalene_mean <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "91-20-3") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
   summarize(mean = mean(x115_total_air_emissions)) %>% 
+  filter(mean > 0) %>% 
   ungroup() %>% 
   mutate(percent_rank = percent_rank(mean))
 
-benzene_median <- tri_naphthalene_benzene %>% 
+benzene_mean <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "71-43-2") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name) %>% 
-  summarize(median = median(x115_total_air_emissions)) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(mean = mean(x115_total_air_emissions)) %>%
+  filter(mean > 0) %>% 
   ungroup() %>% 
-  mutate(percent_rank = percent_rank(median))
+  mutate(percent_rank = percent_rank(mean))
+
+p_anhydride_mean <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "85-44-9") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  filter(mean > 0) %>% 
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(mean))
+
+m_anhydride_mean <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "108-31-6") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  filter(mean > 0) %>%
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(mean))
+
+quinoline_mean <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "91-22-5") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  filter(mean > 0) %>%
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(mean))
+
+styrene_mean <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "100-42-5") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  filter(mean > 0) %>%
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(mean))
+
+creosote_mean <- koppers_tri_pollutants %>% 
+  filter(x76_cas_number == "8001-58-9") %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  filter(mean > 0) %>%
+  ungroup() %>% 
+  mutate(percent_rank = percent_rank(mean))
+
+
 ```
+
+
 
 #### Naphthalene 
 
@@ -515,22 +666,156 @@ datatable(benzene_mean, filter = 'top', class = 'cell-border stripe order-column
 
 ```
 
+#### Phthalic anhydride
+
+```{r}
+#| output: true
+datatable(p_anhydride_mean, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+#### Maleic anhydride
+
+```{r}
+#| output: true
+datatable(m_anhydride_mean, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+#### Quinoline
+
+```{r}
+#| output: true
+datatable(quinoline_mean, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+#### Styrene
+
+```{r}
+#| output: true
+datatable(styrene_mean, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+
+#### Creosote
+
+```{r}
+#| output: true
+datatable(creosote_mean, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
 ## Cancer Risk by Census tract for benzene and napthalene 
 ### Data 
-- This data comes from the EPA's AirToxScreen and represents the additional amount of people who could have cancer from this specific pollutan, e.g. an extra 10 in one million 
-- What's interesting is that AirToxScreen includes naphthalene even though it's just a possible carcinogen, but doesn't include all possible or probable carcinogens 
+- This data comes from the EPA's AirToxScreen and represents the additional amount of people who could have cancer from this specific pollutant, e.g. an extra 10 in one million 
+- AirToxScreen includes naphthalene even though it's just a possible carcinogen
+
 ### Findings 
+- For cancer risk from benzene, the census tracts around Koppers are in top 10% of the country
+  - The national average is 1.9 
+  - Illinois averages 2 
+  - Cicero tracts average 3.04
+- For cancer risk from naphthalene, the census tracts around Koppers are in the top 1% of the country. 
+  - The national average is 0.8
+  - Illinois averages  is 0.7
+  - Cicero tracts average 5.69, though the highest is 10, right behind Koppers
 
 ### Benzene
 ```{r}
 
 cicero_tracts <- c("031815500","031814500","031814400", "31814300", "031814200","031820700", "031560100", "031560200", "031820800")
-  
+
+benzene_risk_national <- cancer_risk_tract %>% 
+  select(-naphthalene) %>% 
+  filter(!county == c("Entire State", "Entire US"))
 
 benzene_risk_cicero <- cancer_risk_tract %>% 
   select(-naphthalene) %>% 
+  filter(!county == c("Entire State", "Entire US")) %>% 
   mutate(percent_rank = percent_rank(benzene)) %>% 
   filter(census_tract %in% cicero_tracts)
+
+benzene_risk_illinois <- cancer_risk_tract %>% 
+  select(-naphthalene) %>% 
+  filter(!county == c("Entire State", "Entire US")) %>% 
+  filter(state == "IL") %>% 
+  mutate(percent_rank = percent_rank(benzene)) 
+
+
+national_benzene_risk_avg <- mean(benzene_risk_national$benzene) # is 1.9 for the country
+illinois_benzene_risk_avg <- mean(benzene_risk_illinois$benzene) # 2 for illinois 
+ciero_benzene_risk_avg <- mean(benzene_risk_cicero$benzene) # is 3.04 for Cicero
+
 ```
 
 
@@ -560,15 +845,35 @@ datatable(benzene_risk_cicero, filter = 'top', class = 'cell-border stripe order
 
 cicero_tracts <- c("031815500","031814500","031814400", "31814300", "031814200","031820700", "031560100", "031560200", "031820800")
 
-naphthalene_risk_top_100 <- cancer_risk_tract %>% 
+
+naphthalene_risk_national <- cancer_risk_tract %>% 
   select(-benzene) %>% 
+  filter(!county == c("Entire State", "Entire US"))
+
+naphthalene_risk_top_100 <- naphthalene_risk_national %>% 
   mutate(percent_rank = percent_rank(naphthalene)) %>% 
   slice_max(order_by = naphthalene, n = 100)
 
+
 naphthalene_risk_cicero <- cancer_risk_tract %>% 
   select(-benzene) %>% 
+  filter(!county == c("Entire State", "Entire US")) %>% 
   mutate(percent_rank = percent_rank(naphthalene)) %>% 
   filter(census_tract %in% cicero_tracts)
+
+naphthalene_risk_illinois <- cancer_risk_tract %>% 
+  select(-benzene) %>% 
+  filter(!county == c("Entire State", "Entire US")) %>% 
+  filter(state == "IL") %>% 
+  mutate(percent_rank = percent_rank(naphthalene)) 
+
+
+national_naphthalene_risk_avg <- mean(naphthalene_risk_national$naphthalene) # is 1.9 for the country
+illinois_naphthalene_risk_avg <- mean(naphthalene_risk_illinois$naphthalene) # 2 for illinois 
+ciero_naphthalene_risk_avg <- mean(naphthalene_risk_cicero$naphthalene) # is 3.04 for Cicero
+
+
+
 ```
 
 #### Top 100 Census tracts as for Naphthalene risk across the country
