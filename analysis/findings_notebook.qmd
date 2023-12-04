@@ -33,6 +33,12 @@ cook_county_emissions <- read_excel(here("data", "raw", "foia_reported_emissions
   pivot_longer(cols = contains("x"), names_to = "year", values_to = "emissions") %>% 
   mutate(year = str_replace(year, "x", ""))
 
+num_facilities <- cook_county_emissions %>% 
+  distinct(name, address)
+
+num_pollutants <- cook_county_emissions %>% 
+  distinct(pollutant_code)
+
 # National data from the EPA's Toxic Release Inventory on emissions for benzene, naphthalene, phthalic anhydride, maleic anhydride, quinoline, styrene and creosote. This data is the first file of the Basic Plus dataset. I pulled the years 2012 to 2022 since that is what we have for the Cook County emissions inventory. The data loaded here was processed in cleaned in the etl/prep_tri_data.R file. 
 koppers_tri_pollutants <- read_csv(here("data", "processed", "koppers_tri_pollutants.csv"))
 
