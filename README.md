@@ -7,7 +7,7 @@ You can find our earlier work on Chicago's air quality in [chicago-air-quality-a
 
 ## Data
 
-Several of the data files used in this analysis were too large to host on GitHub. You can [dowload our data folder directly as zip file](https://cdn.muckrock.com/files_static/2023/cicero/data.zip). If you have forked this repo, you can store the `data` folder in the root directory, `cicero-koppers-air-pollution`, to access the data files from our `etl` and `analysis` folders. 
+Several of the data files used in this analysis were too large to host on GitHub. **You can [dowload our data folder directly as zip file](https://cdn.muckrock.com/files_static/2023/cicero/data.zip)**. If you have forked this repo, you can store the `data` folder in the root directory, `cicero-koppers-air-pollution`, to access the data files from our `etl` and `analysis` folders. 
 
 ### Illinois Air Emissions Inventory
 Through an open-records request to the Illinois Environmental Protection Agency, MuckRock and the Cicero Independiente received Illinois emissions inventory data from 2012 to 2021, for 141 pollutants released at more than 1,000 facilities in Cook County. 
