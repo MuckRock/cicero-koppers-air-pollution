@@ -26,4 +26,8 @@ We also used the federal EPA’s national air toxics risk assessment based on em
 
 You can find a data dictionary for TRI's Basic Plus Files in `data/dictionaries`.
 
-### Mapping 
+## Mapping 
+In `etl/geocode.R`, we geocoded facility addresses from the Illinois EPA Air Emissions Inventory using Google's Geocoding API, which we then exported to `data/processed/aer_lat_longs.csv` and then used in `analysis/map_eda` to generate maps of polluters by pollutant that formed the basis for our illustrated map of benzene and naphthalene polluters in the story. 
+
+## Questions / Feedback
+Contact Dillon Bergin at dillon@muckrock.com. 
