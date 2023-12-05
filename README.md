@@ -15,7 +15,7 @@ We copied the [Illinois EPA pollutant codes](https://epa.illinois.gov/topics/air
 ### EPA's Toxics Release Inventory
 After analyzing the amount and types of emissions from Koppers in Cicero, we compared the plant to others nationally using the federal [EPA’s Toxics Release Inventory](https://www.epa.gov/toxics-release-inventory-tri-program/tri-data-and-tools). We pulled 10 years’ worth of the [Basic Plus Data Files](https://www.epa.gov/toxics-release-inventory-tri-program/tri-basic-plus-data-files-calendar-years-1987-present), from 2012 to 2022.
 
-The raw data files are in `data/raw/toxic_release_inventory`. In `etl/prep_tri_data.R`, we then concatenated the years together and filtered the data to focus on the column `115_total_air_emissions`, which is the total air emissions for the facility, for several hazardous or cancer-linked chemicals, including those also emitted at Koppers: benzene, naphthalene, phthalic anhydride, maleic anhydride, quinoline, styrene and creosote.
+The raw data files are in `data/raw/toxic_release_inventory/`. In `etl/prep_tri_data.R`, we then concatenated the years together and filtered the data to focus on the column `115_total_air_emissions`, which is the total air emissions for the facility, for several hazardous or cancer-linked chemicals, including those also emitted at Koppers: benzene, naphthalene, phthalic anhydride, maleic anhydride, quinoline, styrene and creosote.
 
 We chose the pollutants after speaking with three environmental health experts and reviewing each pollutant that Koppers emits to check its carcinogenic classification in the file `data/manual/koppers_pollutants_cancer_check.csv`.
 
