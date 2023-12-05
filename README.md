@@ -17,7 +17,7 @@ After analyzing the amount and types of emissions from Koppers in Cicero, we com
 
 The raw data files are in `data/raw/toxic_release_inventory/`. In `etl/prep_tri_data.R`, we then concatenated the years together and filtered the data to focus on the column `115_total_air_emissions`, which is the total air emissions for the facility, for several hazardous or cancer-linked chemicals, including those also emitted at Koppers: benzene, naphthalene, phthalic anhydride, maleic anhydride, quinoline, styrene and creosote.
 
-We chose the pollutants after speaking with three environmental health experts and reviewing each pollutant that Koppers emits to check its carcinogenic classification in the file `data/manual/koppers_pollutants_cancer_check.csv`.
+We chose those pollutants after speaking with three environmental health experts and reviewing each pollutant that Koppers emits to check its carcinogenic classification in the file `data/manual/koppers_pollutants_cancer_check.csv`.
 
 The filter data was exported to `data/koppers_tri_pollutants.csv` and used in `analysis/findings_notebook.qmd` to assess how Koppers compares to other facilities across the country that report their emissions in the Toxics Release Inventory.  
 
