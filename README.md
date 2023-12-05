@@ -8,7 +8,7 @@ You can find our earlier work on Chicago's air quality in [chicago-air-quality-a
 ## Data
 
 ### Illinois Air Emissions Inventory
-Through an open-records request to the Illinois Environmental Protection Agency, MuckRock and the Cicero Independiente received Illinois state inventory data from 2012 to 2021, for 141 pollutants released at more than 1,000 facilities in Cook County. 
+Through an open-records request to the Illinois Environmental Protection Agency, MuckRock and the Cicero Independiente received Illinois emissions inventory data from 2012 to 2021, for 141 pollutants released at more than 1,000 facilities in Cook County. 
 
 We copied the [Illinois EPA pollutant codes](https://epa.illinois.gov/topics/air-quality/planning-reporting/annual-emission-reports/reference-tables/pollutants.html) and stored them in `data/manual/pollutant_code_crosswalk.csv` to use in analysis. The raw data from our request is in the file `data/raw/foia_reported_emissions_2012-2021.csv` and is used in `analysis/findings_notebook.qmd` to calculate the average annual pollution of Koppers compared to other polluters in Cook County from 2012 to 2021. 
 
