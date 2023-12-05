@@ -19,7 +19,7 @@ The raw data files are in `data/raw/toxic_release_inventory/`. In `etl/prep_tri_
 
 We chose those pollutants after speaking with three environmental health experts and reviewing each pollutant that Koppers emits to check its carcinogenic classification in the file `data/manual/koppers_pollutants_cancer_check.csv`.
 
-The filter data was exported to `data/koppers_tri_pollutants.csv` and used in `analysis/findings_notebook.qmd` to assess how Koppers compares to other facilities across the country that report their emissions in the Toxics Release Inventory.  
+The filtered data was exported to `data/koppers_tri_pollutants.csv` and used in `analysis/findings_notebook.qmd` to assess how Koppers compares to other facilities across the country that report their emissions in the Toxics Release Inventory.  
 
 ### EPA's AirToxScreen 
 We also used the federal EPA’s national air toxics risk assessment based on emissions inventories, now called [AirToxScreen](https://www.epa.gov/AirToxScreen/2019-airtoxscreen), to identify census tracts in Cicero that face an elevated risk of cancer from benzene and naphthalene. We downloaded the [2019 AirToxScreen National Cancer Risk by Pollutant (xlsx)](https://www.epa.gov/AirToxScreen/2019-airtoxscreen-assessment-results) file and stored it in `data/raw/2019_National_CancerRisk_by_tract_poll.xlsx` before loading it into `etl/prep_tract_analysis.R` to filter the data file and make it smaller, so it could be used in `analysis/findings_notebook.qmd` to compare the cancer risks from benzene and naphthalene in Cicero to census tracts across the country. 
