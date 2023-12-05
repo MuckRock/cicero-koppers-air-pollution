@@ -63,15 +63,15 @@ cancer_risk_tract <- read_csv(here("data", "processed", "airtoxscreen_naphthalen
 ```{r}
 cicero_mean <- cook_county_emissions %>% 
   filter(city == "Cicero") %>% 
-  group_by(name, pollutant_code, chemical_name) %>% 
-  summarize(mean_emissions = mean(emissions, na.rm = TRUE))
+  group_by(name, address, pollutant_code, chemical_name) %>% 
+  summarize(mean_tons = mean(emissions, na.rm = TRUE), mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2))
 
 ```
 
 ```{r}
 cicero_mean_highest_values <- cicero_mean %>% 
   group_by(pollutant_code, chemical_name) %>% 
-  filter(mean_emissions == max(mean_emissions))
+  filter(mean_pounds == max(mean_pounds))
               
 ```
 
@@ -121,8 +121,8 @@ datatable(cicero_mean_highest_values, filter = 'top', class = 'cell-border strip
 ```{r}
 koppers_pollutants <- cook_county_emissions %>% 
   filter(name == "Koppers Inc") %>% 
-  group_by(name, pollutant_code, chemical_name) %>% 
-  summarize(sum_total_emissions = sum(emissions, na.rm = TRUE)) 
+  group_by(name, address, pollutant_code, chemical_name) %>% 
+  summarize(mean_tons = mean(emissions, na.rm = TRUE), mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) 
 
 ```
 
@@ -152,98 +152,98 @@ datatable(koppers_pollutants, filter = 'top', class = 'cell-border stripe order-
 ```{r}
 cook_county_so2_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "SO2") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 
 ```{r}
 cook_county_nox_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "NOX") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 
 ```{r}
 cook_county_vom_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "VOM") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 
 ```{r}
 cook_county_panhy_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "85449") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 
 ```{r}
 cook_county_manhy_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "108316") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 
 ```{r}
 cook_county_naphthalene_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "91203") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 
 ```{r}
 cook_county_benzene_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "BENZENE") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000, 4)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 ```{r}
 cook_county_quinoline_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "QUINOLINE") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2))%>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 ```{r}
 cook_county_styrene_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "STYRENE") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 
 ```{r}
 cook_county_creosote_avg <- cook_county_emissions %>% 
   filter(pollutant_code == "8001589") %>% 
-  group_by(name) %>% 
-  summarize(avg = round(mean(emissions, na.rm = TRUE),2)) %>% 
+  group_by(name, address) %>% 
+  summarize(mean_pounds = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
   ungroup %>% 
-  mutate(percent_rank = round(percent_rank(avg), 2))
+  mutate(percent_rank = round(percent_rank(mean_pounds), 2))
 ```
 
 
@@ -509,7 +509,7 @@ datatable(cook_county_creosote_avg, filter = 'top', class = 'cell-border stripe 
 ```{r}
 naphthalene_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "91-20-3") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
   summarize(sum_total = sum(x115_total_air_emissions)) %>%  
   filter(sum_total > 0) %>% 
   ungroup() %>% 
@@ -517,7 +517,7 @@ naphthalene_sum <- koppers_tri_pollutants %>%
 
 benzene_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "71-43-2") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
   summarize(sum_total = sum(x115_total_air_emissions)) %>% 
   filter(sum_total > 0) %>% 
   ungroup() %>% 
@@ -525,7 +525,7 @@ benzene_sum <- koppers_tri_pollutants %>%
 
 p_anhydride_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "85-44-9") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
   summarize(sum_total = sum(x115_total_air_emissions)) %>%  
   filter(sum_total > 0) %>% 
   ungroup() %>% 
@@ -533,7 +533,7 @@ p_anhydride_sum <- koppers_tri_pollutants %>%
 
 m_anhydride_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "108-31-6") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
   summarize(sum_total = sum(x115_total_air_emissions)) %>% 
   filter(sum_total > 0) %>% 
   ungroup() %>% 
@@ -541,7 +541,7 @@ m_anhydride_sum <- koppers_tri_pollutants %>%
 
 quinoline_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "91-22-5") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
   summarize(sum_total = sum(x115_total_air_emissions)) %>%  
   filter(sum_total > 0) %>% 
   ungroup() %>% 
@@ -549,7 +549,7 @@ quinoline_sum <- koppers_tri_pollutants %>%
 
 styrene_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "100-42-5") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name,x11_facility_street, x12_facility_city) %>% 
   summarize(sum_total = sum(x115_total_air_emissions)) %>% 
   filter(sum_total > 0) %>% 
   ungroup() %>% 
@@ -557,7 +557,7 @@ styrene_sum <- koppers_tri_pollutants %>%
 
 creosote_sum <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "8001-58-9") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name,x11_facility_street, x12_facility_city) %>% 
   summarize(sum_total = sum(x115_total_air_emissions)) %>%  
   filter(sum_total > 0) %>% 
   ungroup() %>% 
@@ -570,56 +570,56 @@ creosote_sum <- koppers_tri_pollutants %>%
 ```{r}
 naphthalene_mean <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "91-20-3") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
-  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
+  summarize(mean = round(mean(x115_total_air_emissions),2)) %>% 
   filter(mean > 0) %>% 
   ungroup() %>% 
   mutate(percent_rank = percent_rank(mean))
 
 benzene_mean <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "71-43-2") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
-  summarize(mean = mean(x115_total_air_emissions)) %>%
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
+  summarize(mean = round(mean(x115_total_air_emissions),2)) %>%
   filter(mean > 0) %>% 
   ungroup() %>% 
   mutate(percent_rank = percent_rank(mean))
 
 p_anhydride_mean <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "85-44-9") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
-  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
+  summarize(mean = round(mean(x115_total_air_emissions),2)) %>% 
   filter(mean > 0) %>% 
   ungroup() %>% 
   mutate(percent_rank = percent_rank(mean))
 
 m_anhydride_mean <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "108-31-6") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
-  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
+  summarize(mean = round(mean(x115_total_air_emissions),2)) %>% 
   filter(mean > 0) %>%
   ungroup() %>% 
   mutate(percent_rank = percent_rank(mean))
 
 quinoline_mean <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "91-22-5") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
-  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
+  summarize(mean = round(mean(x115_total_air_emissions),2)) %>% 
   filter(mean > 0) %>%
   ungroup() %>% 
   mutate(percent_rank = percent_rank(mean))
 
 styrene_mean <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "100-42-5") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
-  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
+  summarize(mean = round(mean(x115_total_air_emissions),2)) %>% 
   filter(mean > 0) %>%
   ungroup() %>% 
   mutate(percent_rank = percent_rank(mean))
 
 creosote_mean <- koppers_tri_pollutants %>% 
   filter(x76_cas_number == "8001-58-9") %>% 
-  group_by(x74_frs_facility_id, x10_facility_name, x12_facility_city) %>% 
-  summarize(mean = mean(x115_total_air_emissions)) %>% 
+  group_by(x74_frs_facility_id, x10_facility_name, x11_facility_street, x12_facility_city) %>% 
+  summarize(mean = round(mean(x115_total_air_emissions),2)) %>% 
   filter(mean > 0) %>%
   ungroup() %>% 
   mutate(percent_rank = percent_rank(mean))
@@ -781,6 +781,53 @@ datatable(creosote_mean, filter = 'top', class = 'cell-border stripe order-colum
 
 ```
 
+
+#### How do TRI and IEPA data compare 
+- A decade of averages line up fairly closely for all pollutants except Benzene, which Koppers reports a lot more of to IEPA than TRI
+
+```{r}
+iepa_avgs <- cook_county_emissions %>% 
+  filter(name == "Koppers Inc" & address == "3900 S Laramie Ave") %>% 
+  group_by(chemical_name, pollutant_code) %>% 
+  summarize(iepa_mean = round(mean(emissions, na.rm = TRUE)*2000,2)) %>% 
+  mutate(chemical_name = case_when(pollutant_code == "8001589" ~ "Creosote", TRUE ~ chemical_name)) %>% 
+  filter(chemical_name %in% c("Naphthalene", "Benzene", "Phthalic anhydride", "Maleic anhydride", "Quinoline", "Styrene", "Creosote"))
+
+tri_avgs <- koppers_tri_pollutants %>% 
+  filter(x10_facility_name == "KOPPERS INC", x11_facility_street == "3900 S LARAMIE AVE") %>% 
+  group_by(x78_chemical_name) %>% 
+  summarize(tri_mean = round(mean(x115_total_air_emissions),2)) %>% 
+  rename(chemical_name = x78_chemical_name)
+
+tri_iepa_diff <- iepa_avgs %>% 
+  left_join(tri_avgs, by = "chemical_name")
+
+```
+
+
+```{r}
+#| output: true
+datatable(tri_iepa_diff, filter = 'top', class = 'cell-border stripe order-column', extensions = 'Buttons',
+
+                            options = list(
+                                paging = TRUE,
+                                searching = TRUE,
+                                fixedColumns = TRUE,
+                                autoWidth = TRUE,
+                                ordering = TRUE,
+                                dom = 'tB',
+                                buttons = c('copy', 'csv', 'excel')
+                            ))
+
+
+
+
+```
+
+
+
+
+
 ## Cancer Risk by Census tract for benzene and napthalene 
 ### Data 
 - This data comes from the EPA's AirToxScreen and represents the additional amount of people who could have cancer from this specific pollutant, e.g. an extra 10 in one million 
@@ -823,6 +870,8 @@ illinois_benzene_risk_avg <- mean(benzene_risk_illinois$benzene) # 2 for illinoi
 ciero_benzene_risk_avg <- mean(benzene_risk_cicero$benzene) # is 3.04 for Cicero
 
 ```
+
+
 
 
 #### Benzene risk in Cicero tracts near Koppers
