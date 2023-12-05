@@ -21,10 +21,10 @@ We chose those pollutants after speaking with three environmental health experts
 
 The filtered data was exported to `data/koppers_tri_pollutants.csv` and used in `analysis/findings_notebook.qmd` to assess how Koppers compares to other facilities across the country that report their emissions in the Toxics Release Inventory.  
 
+You can find a data dictionary for TRI's Basic Plus Files in `data/dictionaries`.
+
 ### EPA's AirToxScreen 
 We used the federal EPA’s national air toxics risk assessment based on emissions inventories, now called [AirToxScreen](https://www.epa.gov/AirToxScreen/2019-airtoxscreen), to identify census tracts in Cicero that face an elevated risk of cancer from benzene and naphthalene. We downloaded the [2019 AirToxScreen National Cancer Risk by Pollutant (xlsx)](https://www.epa.gov/AirToxScreen/2019-airtoxscreen-assessment-results) file and stored it in `data/raw/2019_National_CancerRisk_by_tract_poll.xlsx` before loading it into `etl/prep_tract_analysis.R` to filter the data file and make it smaller, so it could be used in `analysis/findings_notebook.qmd` to compare the cancer risks from benzene and naphthalene in Cicero to census tracts across the country. 
-
-You can find a data dictionary for TRI's Basic Plus Files in `data/dictionaries`.
 
 ## Mapping 
 In `etl/geocode.R`, we geocoded facility addresses from the Illinois EPA Air Emissions Inventory using Google's Geocoding API, which we then exported to `data/processed/aer_lat_longs.csv` and then used in `analysis/map_eda` to generate maps of polluters by pollutant that formed the basis for our illustrated map of benzene and naphthalene polluters in the story. 
