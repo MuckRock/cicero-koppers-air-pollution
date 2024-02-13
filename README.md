@@ -7,7 +7,7 @@ You can find our earlier work on Chicago's air quality in [chicago-air-quality-a
 
 ## Data
 
-Several of the data files used in this analysis were too large to host on GitHub. **You can [dowload our data folder directly as zip file](https://cdn.muckrock.com/files_static/2023/cicero/data.zip)**. If you have forked this repo, you can store the `data` folder in the root directory, `cicero-koppers-air-pollution`, to access the data files from our `etl` and `analysis` folders. 
+Several of the data files used in this analysis were too large to host on GitHub. **You can [download our data folder directly as zip file](https://cdn.muckrock.com/files_static/2023/cicero/data.zip)**. If you have forked this repo, you can store the `data` folder in the root directory, `cicero-koppers-air-pollution`, to access the data files from our `etl` and `analysis` folders. 
 
 ### Illinois Air Emissions Inventory
 Through an open-records request to the Illinois Environmental Protection Agency, MuckRock and the Cicero Independiente received Illinois emissions inventory data from 2012 to 2021, for 141 pollutants released at more than 1,000 facilities in Cook County. 
@@ -28,9 +28,6 @@ You can find a data dictionary for TRI's Basic Plus Files in `data/dictionaries`
 ### EPA's AirToxScreen 
 We used the federal EPA’s national air toxics risk assessment based on emissions inventories, now called [AirToxScreen](https://www.epa.gov/AirToxScreen/2019-airtoxscreen), to identify census tracts in Cicero that face an elevated risk of cancer from benzene and naphthalene. We downloaded the [2019 AirToxScreen National Cancer Risk by Pollutant (xlsx)](https://www.epa.gov/AirToxScreen/2019-airtoxscreen-assessment-results) file and stored it in `data/raw/2019_National_CancerRisk_by_tract_poll.xlsx` before loading it into `etl/prep_tract_analysis.R` to filter the data file and make it smaller, so it could be used in `analysis/findings_notebook.qmd` to compare the cancer risks from benzene and naphthalene in Cicero to census tracts across the country. 
 
-## Mapping 
-In `etl/geocode.R`, we geocoded facility addresses from the Illinois EPA Air Emissions Inventory using Google's Geocoding API, which we then exported to `data/processed/aer_lat_longs.csv` and then used in `analysis/map_eda` to generate maps of polluters by pollutant that formed the basis for our illustrated map of Cook County's benzene and naphthalene polluters in the story. 
-
 ### Insider trading and Form 4 SEC files 
 
 As a publicly-traded company, Koppers is required to report all stock transactions by its senior executives and large shareholders to the U.S. Securities and Exchange Commission in filings called a "Form 4." 
@@ -41,6 +38,10 @@ We exported all SEC Form 4 filings for Koppers from Jan. 1, 2006, through Dec. 3
 - The data was then shared with several accounting experts who specialize in Form 4 reporting requirements, for analysis and interpretation
 
 You can find the data in `data/manual/insider_trades.csv` and you can access all Koppers Form 4 filings, and other corporate documents, [through the SEC's EDGAR portal](https://www.sec.gov/edgar/browse/?CIK=0001315257&owner=include)
+
+## Mapping 
+In `etl/geocode.R`, we geocoded facility addresses from the Illinois EPA Air Emissions Inventory using Google's Geocoding API, which we then exported to `data/processed/aer_lat_longs.csv` and then used in `analysis/map_eda` to generate maps of polluters by pollutant that formed the basis for our illustrated map of Cook County's benzene and naphthalene polluters in the story. 
+
 
 ## Questions / Feedback
 Contact Dillon Bergin at dillon@muckrock.com. 
