@@ -1,0 +1,61 @@
+---
+title: "Quick analysis of DocumentCloud hand annotated data" 
+execute:
+  output: false
+  echo: false
+format:
+  html:
+    code-tools: true
+    theme: cosmo
+    toc: true
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(here)
+library(jsonlite)
+library(lubridate)
+library(zoo)
+
+```
+
+Data scraped from DocumentCloud documents 
+- We received 10 notices of violations against Koppers since 2000
+_ I took notes on all the documents in DocumentCloud and then scraped those notes out of DocumentCloud as metadata 
+
+```{r}
+dc_data <- read_csv(here("data","manual","documentcloud_metadata.csv"))
+# Adding a seperate dataset with public DocumnentCloud URL, because first dataset is private notes and URL 
+dc_data_url <- read.csv(here("data","manual","documentcloud_metadata_url.csv")) %>% 
+  clean_names()
+```
+
+```{r results=F, warning=F, message=F}
+
+df_url <- dc_data_url %>% 
+  select(title, canonical_url, violation_num)
+
+df <- 
+  dc_data %>% 
+  select(id, title, description, `Key Value Pairs`) %>% 
+  mutate(key_pairs = gsub("'", '"', `Key Value Pairs`)) %>% 
+  mutate(key_pairs = map(key_pairs, fromJSON)) %>% 
+  select(id, title, description, key_pairs) %>% 
+  unnest_wider(key_pairs) %>% 
+  mutate(year = substr(violation_num, 3, 6)) %>% 
+  mutate(num_violations = as.numeric(num_violations)) %>% 
+  inner_join(df_url, by = "violation_num")
+
+```
+
+```{r}
+novs <- 
+  df %>% 
+  distinct(violation_num)
+```
+
+```{r}
+total_violations <- sum(df$num_violations)
+```
+

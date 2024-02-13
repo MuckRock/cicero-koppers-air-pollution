@@ -31,5 +31,16 @@ We used the federal EPA’s national air toxics risk assessment based on emissio
 ## Mapping 
 In `etl/geocode.R`, we geocoded facility addresses from the Illinois EPA Air Emissions Inventory using Google's Geocoding API, which we then exported to `data/processed/aer_lat_longs.csv` and then used in `analysis/map_eda` to generate maps of polluters by pollutant that formed the basis for our illustrated map of Cook County's benzene and naphthalene polluters in the story. 
 
+### Insider trading and Form 4 SEC files 
+
+As a publicly-traded company, Koppers is required to report all stock transactions by its senior executives and large shareholders to the U.S. Securities and Exchange Commission in filings called a "Form 4." 
+
+We exported all SEC Form 4 filings for Koppers from Jan. 1, 2006, through Dec. 31, 2023, to identify trends in different types of transactions by these so-called "insiders." 
+- We then sorted the stock sales to the transaction code, "S," which is defined as the "open market or private sale of non-derivative or derivative security" 
+- Then we grouped these sales by month and quarter to look for trends, and referred to material disclosures and other public company information to determine if the transactions were related to changes in stock price or company leadership changes
+- The data was then shared with several accounting experts who specialize in Form 4 reporting requirements, for analysis and interpretation
+
+You can find the data in `data/manual/insider_trades.csv` and you can access all Koppers Form 4 filings, and other corporate documents, [through the SEC's EDGAR portal](https://www.sec.gov/edgar/browse/?CIK=0001315257&owner=include)
+
 ## Questions / Feedback
 Contact Dillon Bergin at dillon@muckrock.com. 
